@@ -27,8 +27,18 @@
 # include <stddef.h>
 # include <stdio.h>
 
+# ifdef __cplusplus
+namespace criterion {
+extern "C" {
+# endif
+
 extern FILE *g_event_pipe;
 
 void send_event(int kind, void *data, size_t size);
+
+# ifdef __cplusplus
+}
+}
+# endif
 
 #endif /* !CRITERION_EVENT_H_ */

@@ -26,6 +26,19 @@
 
 # include "common.h"
 
+# ifdef __cplusplus
+extern "C" {
+# endif
+
 NORETURN void criterion_abort_test(void);
+
+# ifdef __cplusplus
+}
+
+namespace criterion {
+    void (&abort_test)(void) = criterion_abort_test;
+}
+# endif
+
 
 #endif /* !CRITERION_ABORT_H_ */

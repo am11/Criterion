@@ -24,27 +24,67 @@
 #ifndef CRITERION_ASSERT_H_
 # define CRITERION_ASSERT_H_
 
-# include <string.h>
-# include <stdlib.h>
-# include <stdbool.h>
+# ifndef __cplusplus
+#  include <string.h>
+#  include <stdlib.h>
+#  include <stdbool.h>
+# endif
 # include "types.h"
 # include "stats.h"
 # include "hooks.h"
 # include "event.h"
 # include "abort.h"
 
-enum criterion_assert_kind {
+# ifdef __cplusplus
+namespace criterion {
+#  define CRITERION_STRUCT_ASSERT_KIND assert_kind
+#  define CRITERION_STRUCT_ASSERT_ARGS assert_args
+# else
+#  define CRITERION_STRUCT_ASSERT_KIND criterion_assert_kind
+#  define CRITERION_STRUCT_ASSERT_ARGS criterion_assert_args
+# endif
+
+enum CRITERION_STRUCT_ASSERT_KIND {
     NORMAL,
     FATAL
 };
 
-struct criterion_assert_args {
+struct CRITERION_STRUCT_ASSERT_ARGS {
     const char *msg;
     const char *default_msg;
     int sentinel_;
 };
 
-# define cr_assert_impl(Kind, Condition, ...)                   \
+# ifdef __cplusplus
+template <bool Condition,
+          const char *Condition_msg,
+          const char *File,
+          const char *Line,
+          criterion::assert_kind Kind,
+          const char *Msg = "",
+          const char *Default_msg = "">
+void assert_impl() {
+    criterion::assert_stats stat;
+    stat.kind = Kind;
+    stat.condition = Condition_msg;
+    stat.message = Msg ? Msg : (Default_msg ? Default_msg : "");
+    stat.passed = Condition;
+    stat.file = File;
+    stat.line = Line;
+    send_event(criterion::ASSERT, &stat, sizeof (stat));
+    if (!Condition && Kind == FATAL)
+        criterion_abort_test();
+}
+
+}
+#  define cr_assert_impl(Condition, ...)                  \
+    criterion::assert_impl<Condition, #Condition, __FILE__, __LINE__, ## __VA_ARGS__>()
+
+# define cr_abort_test(Message)                                             \
+    cr_assert(0, (Message), "The conditions for this test were not met.")
+
+# else
+#  define cr_assert_impl(Kind, Condition, ...)                  \
     do {                                                        \
         struct criterion_assert_args args = {                   \
             __VA_ARGS__                                         \
@@ -75,6 +115,11 @@ struct criterion_assert_args {
 # define cr_assert(...) cr_assert_(__VA_ARGS__, .sentinel_ = 0)
 
 # define cr_expect(...) cr_expect_(__VA_ARGS__, .sentinel_ = 0)
+
+# ifdef __cplusplus
+#  define FATAL ::criterion::FATAL
+#  define NORMAL ::criterion::NORMAL
+# endif
 
 # define cr_assert_(Condition, ...) cr_assert_impl(FATAL,  Condition, __VA_ARGS__)
 # define cr_expect_(Condition, ...) cr_assert_impl(NORMAL, Condition, __VA_ARGS__)
@@ -269,9 +314,11 @@ struct criterion_assert_args {
     cr_expect_arrays_eq_cmp_(__VA_ARGS__, .sentinel_ = 0)
 # endif /* !__GNUC__ */
 
+# endif /* !!__cplusplus */
+
 // The section below is here for backward compatibility purposes.
 // It shall be removed in the text major version of Criterion
-# ifndef CRITERION_NO_COMPAT
+# if !defined(CRITERION_NO_COMPAT) && !defined(__cplusplus)
 
 #  define CRITERION_ASSERT_DEPRECATED_(Name) CRITERION_ASSERT_DEPRECATED__(    \
         message                                                                \

@@ -26,7 +26,20 @@
 
 # include "types.h"
 
-struct criterion_assert_stats {
+# ifdef __cplusplus
+namespace criterion {
+#  define CRITERION_STRUCT_ASSERT_STATS assert_stats
+#  define CRITERION_STRUCT_TEST_STATS test_stats
+#  define CRITERION_STRUCT_SUITE_STATS suite_stats
+#  define CRITERION_STRUCT_GLOBAL_STATS global_stats
+# else
+#  define CRITERION_STRUCT_ASSERT_STATS criterion_assert_stats
+#  define CRITERION_STRUCT_TEST_STATS criterion_test_stats
+#  define CRITERION_STRUCT_SUITE_STATS criterion_suite_stats
+#  define CRITERION_STRUCT_GLOBAL_STATS criterion_global_stats
+# endif
+
+struct CRITERION_STRUCT_ASSERT_STATS {
     int kind;
     const char *condition;
     const char *message;
@@ -34,12 +47,21 @@ struct criterion_assert_stats {
     unsigned line;
     const char *file;
 
+# ifdef __cplusplus
+    ::criterion::assert_stats *next;
+# else
     struct criterion_assert_stats *next;
+# endif
 };
 
-struct criterion_test_stats {
+struct CRITERION_STRUCT_TEST_STATS {
+# ifdef __cplusplus
+    ::criterion::test *test;
+    ::criterion::assert_stats *asserts;
+# else
     struct criterion_test *test;
     struct criterion_assert_stats *asserts;
+# endif
     bool failed;
     int passed_asserts;
     int failed_asserts;
@@ -48,12 +70,21 @@ struct criterion_test_stats {
     unsigned progress;
     const char *file;
 
+# ifdef __cplusplus
+    ::criterion::test_stats *next;
+# else
     struct criterion_test_stats *next;
+# endif
 };
 
-struct criterion_suite_stats {
+struct CRITERION_STRUCT_SUITE_STATS {
+# ifdef __cplusplus
+    ::criterion::suite *suite;
+    ::criterion::test_stats *tests;
+# else
     struct criterion_suite *suite;
     struct criterion_test_stats *tests;
+# endif
     size_t nb_tests;
     size_t nb_asserts;
     size_t tests_skipped;
@@ -63,11 +94,19 @@ struct criterion_suite_stats {
     size_t asserts_failed;
     size_t asserts_passed;
 
+# ifdef __cplusplus
+    ::criterion::suite_stats *next;
+# else
     struct criterion_suite_stats *next;
+# endif
 };
 
-struct criterion_global_stats {
+struct CRITERION_STRUCT_GLOBAL_STATS {
+# ifdef __cplusplus
+    ::criterion::suite_stats *suites;
+# else
     struct criterion_suite_stats *suites;
+# endif
     size_t nb_suites;
     size_t nb_tests;
     size_t nb_asserts;
@@ -78,5 +117,9 @@ struct criterion_global_stats {
     size_t asserts_failed;
     size_t asserts_passed;
 };
+
+# ifdef __cplusplus
+}
+# endif
 
 #endif /* !CRITERION_STATS_H_ */

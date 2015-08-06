@@ -26,6 +26,10 @@
 
 # include "common.h"
 
+# ifdef __cplusplus
+namespace criterion {
+# endif
+
 typedef enum {
     PRE_ALL,
     PRE_SUITE,
@@ -40,6 +44,10 @@ typedef enum {
 } e_report_status;
 
 typedef void (*f_report_hook)();
+
+# ifdef __cplusplus
+}
+# endif
 
 # define HOOK_IDENTIFIER_(Suffix) HOOK_IDENTIFIER__(__LINE__, Suffix)
 # define HOOK_IDENTIFIER__(Line, Suffix) HOOK_IDENTIFIER___(Line, Suffix)

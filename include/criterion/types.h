@@ -24,12 +24,25 @@
 #ifndef CRITERION_TYPES_H_
 # define CRITERION_TYPES_H_
 
-# include <stdbool.h>
-# include <stddef.h>
+# ifndef __cplusplus
+#  include <stdbool.h>
+#  include <stddef.h>
+#  define CRITERION_STRUCT_TEST_EXTRA_DATA criterion_test_extra_data
+#  define CRITERION_STRUCT_TEST criterion_test
+#  define CRITERION_STRUCT_SUITE criterion_suite
+# else
+#  include <cstddef>
+#  define CRITERION_STRUCT_TEST_EXTRA_DATA test_extra_data
+#  define CRITERION_STRUCT_TEST test
+#  define CRITERION_STRUCT_SUITE suite
+# endif
 # include "common.h"
 
-struct criterion_test_extra_data {
-    int sentinel_;
+# ifdef __cplusplus
+namespace criterion {
+# endif
+
+struct CRITERION_STRUCT_TEST_EXTRA_DATA {
     const char *identifier_;
     const char *file_;
     unsigned line_;
@@ -39,20 +52,37 @@ struct criterion_test_extra_data {
     bool disabled;
     const char *description;
     void *data;
+    int sentinel_;
 };
 
-struct criterion_test {
+struct CRITERION_STRUCT_TEST {
     const char *name;
     const char *category;
     void (*test)(void);
+# ifndef __cplusplus
     struct criterion_test_extra_data *data;
+# else
+    test_extra_data *data;
+# endif
 };
 
-struct criterion_suite {
+struct CRITERION_STRUCT_SUITE {
     const char *name;
+# ifndef __cplusplus
     struct criterion_test_extra_data *data;
+# else
+    test_extra_data *data;
+# endif
 };
 
+# ifndef __cplusplus
 typedef void (*f_worker_func)(struct criterion_test *, struct criterion_suite *);
+# else
+typedef void (*f_worker_func)(criterion::test *, criterion::suite *);
+# endif
+
+# ifdef __cplusplus
+}
+# endif
 
 #endif /* !CRITERION_TYPES_H_ */
