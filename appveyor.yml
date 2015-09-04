@@ -44,7 +44,7 @@ test_script:
   - 'make test || bash -lc "cat $APPVEYOR_BUILD_FOLDER/build/Testing/Temporary/LastTest.log"'
 
 after_test:
-   - 'make coveralls_generate'
+   - 'make gcov'
    - codecov
 #after_test:
 #  - 'make coveralls'
