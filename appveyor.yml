@@ -4,6 +4,7 @@ os: Windows Server 2012
 
 init:
   - git config --global core.autocrlf input
+  - 'SET PATH=C:\Python34-x64;C:\Python34-x64\Scripts;%PATH%'
   - 'SET PATH=%PATH%;C:\MinGW\msys\1.0\bin;C:\MinGW\bin;%APPVEYOR_BUILD_FOLDER%\bin;%APPVEYOR_BUILD_FOLDER%\build'
 
 environment:
@@ -25,6 +26,7 @@ platform:
 configuration: Release
 
 install:
+  - pip install codecov
   # Hack to make git think it is on the tip of the repo branch
   - 'git checkout -B %APPVEYOR_REPO_BRANCH%'
   # Configure project
@@ -41,6 +43,9 @@ after_build:
 test_script:
   - 'make test || bash -lc "cat $APPVEYOR_BUILD_FOLDER/build/Testing/Temporary/LastTest.log"'
 
+after_test:
+   - 'make coveralls_generate'
+   - codecov
 #after_test:
 #  - 'make coveralls'
 
