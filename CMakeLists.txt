@@ -147,10 +147,11 @@ add_custom_target(uninstall
     "${CMAKE_COMMAND}" -P "${CMAKE_MODULE_PATH}/uninstall.cmake"
 )
 
-file(GLOB_RECURSE GCNO_FILES "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/*.gcno")
-
 add_custom_target(gcov
-    "gcov" "-lcp" ${GCNO_FILES}
+    "${CMAKE_COMMAND}"
+        -DSOURCE_FILES="${SOURCE_FILES}"
+        -DCOV_PATH="${CMAKE_CURRENT_BINARY_DIR}"
+        -P "${CMAKE_MODULE_PATH}/Gcov.cmake"
 )
 
 enable_testing()
